@@ -2,7 +2,6 @@ const dotenv = require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = 8080;
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const userRoute = require('./routes/user');
 const courseRoute = require('./routes/course');

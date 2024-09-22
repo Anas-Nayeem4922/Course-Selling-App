@@ -7,10 +7,22 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const { auth } = require('../middleware');
 const Purchase = require('../models/purchase');
+const { z } = require('zod');
 
 router.use(express.json());
 
 router.post("/signin", async (req, res) => {
+    let requiredBody = z.object({
+        email: z.string().email(),
+        password: z.string().min(3).max(10)
+    });
+    let response = requiredBody.safeParse(req.body);
+    if (!response.success) {
+        res.json({
+            msg: response.error.issues[0].message
+        });
+        return;
+    }
     let { email, password } = req.body;
     let user = await User.findOne({
         email
@@ -38,6 +50,19 @@ router.post("/signin", async (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
+    const requiredBody = z.object({
+        firstName: z.string().min(3).max(50),
+        lastName: z.string().min(3).max(50),
+        email: z.string().email(),
+        password: z.string().min(3).max(10)
+    });
+    const { success, error } = requiredBody.safeParse(req.body);
+    if (!success) {
+        res.json({
+            msg: error.issues[0].message
+        });
+        return;
+    }
     let { firstName, lastName, email, password } = req.body;
     let hashedPassword = await bcrypt.hash(password, 5);
     const user = await User.create({

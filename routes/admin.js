@@ -7,8 +7,20 @@ const Course = require('../models/course');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
+const { z } = require('zod');
 
 router.post("/signin", async (req, res) => {
+    let requiredBody = z.object({
+        email: z.string().email(),
+        password: z.string().min(3).max(10)
+    });
+    let response = requiredBody.safeParse(req.body);
+    if (!response.success) {
+        res.json({
+            msg: response.error.issues[0].message
+        });
+        return;
+    }
     let { email, password } = req.body;
     let user = await Admin.findOne({
         email
@@ -36,6 +48,19 @@ router.post("/signin", async (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
+    const requiredBody = z.object({
+        firstName: z.string().min(3).max(50),
+        lastName: z.string().min(3).max(50),
+        email: z.string().email(),
+        password: z.string().min(3).max(10)
+    });
+    const { success, error } = requiredBody.safeParse(req.body);
+    if (!success) {
+        res.json({
+            msg: error.issues[0].message
+        });
+        return;
+    }
     let { firstName, lastName, email, password } = req.body;
     let hashedPassword = await bcrypt.hash(password, 5);
     const user = await Admin.create({
@@ -56,6 +81,18 @@ router.post("/signup", async (req, res) => {
 router.post("/course", auth, async (req, res) => {
     let admin = await Admin.findById(req.userId);
     if (admin) {
+        let requiredBody = z.object({
+            title: z.string().min(3).max(20),
+            description: z.string().min(5),
+            price: z.number().min(0),
+            image: z.string().url()
+        });
+        const { success, error } = requiredBody.safeParse(req.body);
+        if (!success) {
+            res.json({
+                msg: error.issues[0].message
+            })
+        }
         let { title, description, price, image } = req.body;
         const course = await Course.create({
             title,
