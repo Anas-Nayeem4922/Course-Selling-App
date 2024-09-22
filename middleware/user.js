@@ -1,10 +1,10 @@
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET_USER = process.env.JWT_SECRET_USER;
 
-function auth(req, res, next) {
+function userAuth(req, res, next) {
     const token = req.headers.token;
-    const response = jwt.verify(token, JWT_SECRET);
+    const response = jwt.verify(token, JWT_SECRET_USER);
     if (response) {
         req.userId = response.userId;
         next();
@@ -16,5 +16,5 @@ function auth(req, res, next) {
 };
 
 module.exports = {
-    auth
-};
+    userAuth
+}

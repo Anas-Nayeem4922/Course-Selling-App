@@ -4,12 +4,11 @@ const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
-const { auth } = require('../middleware');
+const JWT_SECRET = process.env.JWT_SECRET_USER;
+const { userAuth } = require('../middleware/user');
 const Purchase = require('../models/purchase');
 const { z } = require('zod');
 
-router.use(express.json());
 
 router.post("/signin", async (req, res) => {
     let requiredBody = z.object({
@@ -80,7 +79,7 @@ router.post("/signup", async (req, res) => {
     })
 });
 
-router.get("/purchases", auth, async (req, res) => {
+router.get("/purchases", userAuth, async (req, res) => {
     const purchases = await Purchase.find({
         userId: req.userId
     });

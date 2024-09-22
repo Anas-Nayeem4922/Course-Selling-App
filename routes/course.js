@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Course = require('../models/course');
 const Purchase = require('../models/purchase');
-const { auth } = require('../middleware');
+const { userAuth } = require('../middleware/user');
 
 router.get("/", async (req, res) => {
     const allCourses = await Course.find();
@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
     });
 });
 
-router.post("/purchase/:courseId", auth, async (req, res) => {
+router.post("/purchase/:courseId", userAuth, async (req, res) => {
     const { courseId } = req.params;
     let course = await Course.findById(courseId);
     if (course) {

@@ -2,17 +2,19 @@ const dotenv = require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const Admin = require('../models/admin');
-const { auth } = require('../middleware');
+const { adminAuth } = require('../middleware/admin');
 const Course = require('../models/course');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET_ADMIN;
 const { z } = require('zod');
+
+router.use(express.json());
 
 router.post("/signin", async (req, res) => {
     let requiredBody = z.object({
         email: z.string().email(),
-        password: z.string().min(3).max(10)
+        password: z.string().max(10)
     });
     let response = requiredBody.safeParse(req.body);
     if (!response.success) {
@@ -78,7 +80,7 @@ router.post("/signup", async (req, res) => {
     })
 });
 
-router.post("/course", auth, async (req, res) => {
+router.post("/course", adminAuth, async (req, res) => {
     let admin = await Admin.findById(req.userId);
     if (admin) {
         let requiredBody = z.object({
@@ -112,7 +114,7 @@ router.post("/course", auth, async (req, res) => {
     }
 })
 
-router.get("/course", auth, async (req, res) => {
+router.get("/course", adminAuth, async (req, res) => {
     const allCourses = await Course.find();
     res.json({
         allCourses
